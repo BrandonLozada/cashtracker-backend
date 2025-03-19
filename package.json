@@ -1,0 +1,28 @@
+{
+  "name": "cashtracker_backend",
+  "version": "1.0.0",
+  "description": "Cashtracker, a React and Typescript app that uses Node.js in the backend.",
+  "license": "ISC",
+  "author": "BrandonLozada brandon_lozada@outlook.com",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/index.ts",
+    "dev:api": "nodemon src/index.ts --api",
+    "build": "tsc",
+    "start": "node ./dist/index.js"
+  },
+  "dependencies": {
+    "colors": "^1.4.0",
+    "express": "^4.21.2",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^22.13.10",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  }
+}
