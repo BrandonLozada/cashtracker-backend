@@ -9,13 +9,13 @@ class Budget extends Model {
         type: DataType.STRING(100),
         allowNull: false
     })
-    name: string;
+    declare name: string;
 
     @Column({
         type: DataType.DECIMAL,
         allowNull: false
     })
-    ammount: number;
+    declare ammount: number;
 }
 
 export default Budget
