@@ -15,7 +15,7 @@ class Budget extends Model {
         type: DataType.DECIMAL,
         allowNull: false
     })
-    declare ammount: number;
+    declare amount: number;
 }
 
 export default Budget
