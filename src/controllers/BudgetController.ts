@@ -25,18 +25,7 @@ export class BugetController {
     }
 
     static getById = async (req: Request, res: Response) => {
-        try {
-            const { id } = req.params
-            const budget = await Budget.findByPk(id)
-            if (!budget) {
-                const error = new Error('Presupuesto no encontrado.')
-                res.status(404).send({ error: error.message })
-                return
-            }
-            res.json(budget)
-        } catch (error) {
-            res.status(500).send({ error: 'No se obtener el presupuesto.' })
-        }
+        res.json(res.budget)
     }
 
     static updateById = async (req: Request, res: Response) => {
