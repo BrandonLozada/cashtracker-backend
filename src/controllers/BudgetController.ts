@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import Budget from '../models/Budget'
+import Expense from '../models/Expense'
 
 export class BugetController {
     static getAll = async (req: Request, res: Response) => {
@@ -10,7 +11,7 @@ export class BugetController {
             })
             res.json(budgets)
         } catch (error) {
-            res.status(500).send({ error: 'No se puedo obtener los presupuestos.' })
+            res.status(500).send({ error: 'No se pudo obtener los presupuestos.' })
         }
     }
 
@@ -25,7 +26,10 @@ export class BugetController {
     }
 
     static getById = async (req: Request, res: Response) => {
-        res.json(req.budget)
+        const budget = await Budget.findByPk(req.budget.id, {
+            include: [Expense],
+        })
+        res.json(budget)
     }
 
     static updateById = async (req: Request, res: Response) => {
