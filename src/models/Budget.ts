@@ -1,21 +1,27 @@
-import { Table, Column, Model, DataType, HasMany, BelongsTo, ForeignKey } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, HasMany } from 'sequelize-typescript'
+import Expense from './Expense'
 
 @Table({
-    tableName: 'budgets'
+    tableName: 'budgets',
 })
-
 class Budget extends Model {
     @Column({
         type: DataType.STRING(100),
-        allowNull: false
+        allowNull: false,
     })
-    declare name: string;
+    declare name: string
 
     @Column({
         type: DataType.DECIMAL,
-        allowNull: false
+        allowNull: false,
     })
-    declare amount: number;
+    declare amount: number
+
+    @HasMany(() => Expense, {
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+    })
+    declare expenses: Expense[]
 }
 
 export default Budget
