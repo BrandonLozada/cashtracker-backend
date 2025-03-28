@@ -103,4 +103,22 @@ export class AuthController {
 
         res.json("Token válido.")
     }
+
+    static resetPasswordWithToken = async (req: Request, res: Response) => {
+        const { token } = req.params
+        const { password } = req.body
+
+        const user = await User.findOne({ where: { token } })
+        if (!user) {
+            const error = new Error('Token no válido.')
+            res.status(404).send({ error: error.message })
+            return
+        }
+
+        user.password = await hashPassword(password)
+        user.token = null
+        await user.save()
+
+        res.json('Contraseña restablecida correctamente.')
+    }
 }
