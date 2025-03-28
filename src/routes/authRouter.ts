@@ -37,4 +37,20 @@ router.post(
     AuthController.login
 )
 
+router.post(
+    '/forgot-password',
+    body('email').isEmail().withMessage('El correo electrónico no es válido.'),
+    handleInputErrors,
+    AuthController.forgotPassword
+)
+
+router.post(
+    '/validate-token',
+    body('token')
+        .isLength({ min: 6, max: 6 })
+        .withMessage('El token no es válido.'),
+    handleInputErrors,
+    AuthController.validateToken
+)
+
 export default router
