@@ -134,7 +134,10 @@ export class AuthController {
 
         const user = await User.findByPk(id)
 
-        const isPasswordMatched = await checkPassword(currentPassword, user.password)
+        const isPasswordMatched = await checkPassword(
+            currentPassword,
+            user.password
+        )
         if (!isPasswordMatched) {
             const error = new Error('La contraseña actual es incorrecta.')
             res.status(401).send({ error: error.message })
@@ -143,6 +146,22 @@ export class AuthController {
 
         user.password = await hashPassword(password)
         await user.save()
-        res.json("Contraseña actualizada correctamente.")
+        res.json('Contraseña actualizada correctamente.')
+    }
+
+    static checkPassword = async (req: Request, res: Response) => {
+        const { password } = req.body
+        const { id } = req.user
+
+        const user = await User.findByPk(id)
+
+        const isPasswordMatched = await checkPassword(password, user.password)
+        if (!isPasswordMatched) {
+            const error = new Error('Contraseña incorrecta.')
+            res.status(401).send({ error: error.message })
+            return
+        }
+
+        res.json('Contraseña correcta.')
     }
 }
