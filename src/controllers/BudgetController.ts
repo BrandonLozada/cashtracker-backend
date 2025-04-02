@@ -7,7 +7,9 @@ export class BugetController {
         try {
             const budgets = await Budget.findAll({
                 order: [['createdAt', 'DESC']],
-                // TODO: Filtrar por usuario
+                where: {
+                    userId: req.user.id
+                }
             })
             res.json(budgets)
         } catch (error) {
