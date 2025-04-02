@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { BugetController } from '../controllers/BudgetController'
 import { handleInputErrors } from '../middleware/validation'
 import {
+    hasAccess,
     validateBudgetExists,
     validateBudgetId,
     validateBudgetInput,
@@ -16,6 +17,7 @@ router.use(authenticate)
 
 router.param('budgetId', validateBudgetId)
 router.param('budgetId', validateBudgetExists)
+router.param('budgetId', hasAccess)
 
 router.param('expenseId', validateExpenseId)
 router.param('expenseId', validateExpenseExists)
