@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express'
+import jwt from 'jsonwebtoken'
 import User from '../models/User'
 import { checkPassword, hashPassword } from '../utils/auth'
 import { generateToken } from '../utils/token'
@@ -10,7 +11,9 @@ export class AuthController {
         const { email, password } = req.body
         const userExists = await User.findOne({ where: { email } })
         if (userExists) {
-            const error = new Error('Ya existe una cuenta con ese correo electrónico.')
+            const error = new Error(
+                'Ya existe una cuenta con ese correo electrónico.'
+            )
             res.status(409).send({ error: error.message })
             return
         }
@@ -22,7 +25,7 @@ export class AuthController {
             await AuthEmail.sendConfirmationEmail({
                 name: user.name,
                 email: user.email,
-                token: user.token
+                token: user.token,
             })
             res.json('Cuenta creada correctamente.')
         } catch (error) {
@@ -61,7 +64,7 @@ export class AuthController {
         }
 
         const isPasswordMatched = await checkPassword(password, user.password)
-        if(!isPasswordMatched) {
+        if (!isPasswordMatched) {
             const error = new Error('Contraseña incorrecta.')
             res.status(401).send({ error: error.message })
             return
@@ -85,7 +88,7 @@ export class AuthController {
         await AuthEmail.sendResetTokenEmail({
             name: user.name,
             email: user.email,
-            token: user.token
+            token: user.token,
         })
 
         res.json('Revisa tu correo electrónico para seguir las instrucciones.')
@@ -101,7 +104,7 @@ export class AuthController {
             return
         }
 
-        res.json("Token válido.")
+        res.json('Token válido.')
     }
 
     static resetPasswordWithToken = async (req: Request, res: Response) => {
@@ -120,5 +123,41 @@ export class AuthController {
         await user.save()
 
         res.json('Contraseña restablecida correctamente.')
+    }
+
+    static user = async (req: Request, res: Response) => {
+        const bearer = req.headers.authorization
+        if (!bearer) {
+            const error = new Error('No autorizado.')
+            res.status(401).send({ error: error.message })
+            return
+        }
+
+        const [authType, token] = bearer.split(' ')
+        if (authType !== 'Bearer') {
+            const error = new Error('Tipo de autenticación no permitido.')
+            res.status(401).send({ error: error.message })
+            return
+        }
+
+        if (!token) {
+            const error = new Error('Token no válido.')
+            res.status(401).send({ error: error.message })
+            return
+        }
+
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET!)
+            if (typeof decoded === 'object' && decoded.id) {
+                const user = await User.findByPk(decoded.id, {
+                    attributes: ['id', 'name', 'email'],
+                })
+                res.json(user)
+            }
+        } catch (error) {
+            res
+                .status(500)
+                .send({ error: 'No se pudo obtener el usuario autenticado.' })
+        }
     }
 }
