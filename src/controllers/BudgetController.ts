@@ -2,7 +2,7 @@ import type { Request, Response } from 'express'
 import Budget from '../models/Budget'
 import Expense from '../models/Expense'
 
-export class BugetController {
+export class BudgetController {
     static getAll = async (req: Request, res: Response) => {
         try {
             const budgets = await Budget.findAll({
@@ -13,7 +13,7 @@ export class BugetController {
             })
             res.json(budgets)
         } catch (error) {
-            res.status(500).send({ error: 'No se pudo obtener los presupuestos.' })
+            res.status(500).json({ error: 'No se pudo obtener los presupuestos.' })
         }
     }
 
@@ -24,7 +24,7 @@ export class BugetController {
             await budget.save()
             res.status(201).json('Presupuesto creado correctamente.')
         } catch (error) {
-            res.status(500).send({ error: 'No se pudo crear el presupuesto.' })
+            res.status(500).json({ error: 'No se pudo crear el presupuesto.' })
         }
     }
 
