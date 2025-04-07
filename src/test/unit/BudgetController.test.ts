@@ -2,9 +2,11 @@ import { createRequest, createResponse } from 'node-mocks-http'
 import { budgets } from '../mocks/budgets'
 import { BudgetController } from '../../controllers/BudgetController'
 import Budget from '../../models/Budget'
+import { create } from 'domain'
 
 jest.mock('../../models/Budget', () => ({
     findAll: jest.fn(),
+    create: jest.fn(),
 }))
 
 describe('BudgetController.getAll', () => {
@@ -17,7 +19,7 @@ describe('BudgetController.getAll', () => {
         })
     })
 
-    it('should retrieve 2 budgets for user with ID 1', async () => {
+    it('Should retrieve 2 budgets for user with ID 1', async () => {
         const req = createRequest({
             method: 'GET',
             url: '/api/budgets',
@@ -34,7 +36,7 @@ describe('BudgetController.getAll', () => {
         expect(res.statusCode).not.toBe(404);
     })
 
-    it('should retrieve 1 budget for user with ID 2', async () => {
+    it('Should retrieve 1 budget for user with ID 2', async () => {
         const req = createRequest({
             method: 'GET',
             url: '/api/budgets',
@@ -51,7 +53,7 @@ describe('BudgetController.getAll', () => {
         expect(res.statusCode).not.toBe(404);
     })
 
-    it('should retrieve 0 budgets for user with ID 10', async () => {
+    it('Should retrieve 0 budgets for user with ID 10', async () => {
         const req = createRequest({
             method: 'GET',
             url: '/api/budgets',
@@ -68,7 +70,7 @@ describe('BudgetController.getAll', () => {
         expect(res.statusCode).not.toBe(404);
     })
 
-    it('should handle errors when fetching budgets', async () => {
+    it('Should handle errors when fetching budgets', async () => {
         const req = createRequest({
             method: 'GET',
             url: '/api/budgets',
@@ -84,4 +86,64 @@ describe('BudgetController.getAll', () => {
         expect(res.statusCode).toBe(500);
         expect(res._getJSONData()).toEqual({ error: 'No se pudo obtener los presupuestos.' });
     })
+})
+
+describe('BudgetController.create', () => {
+
+    it('Should create a new budget and respond with statusCode 201', async () => {
+        const mockBudget = {
+            save: jest.fn().mockResolvedValue(true),
+        };
+        (Budget.create as jest.Mock).mockResolvedValue(mockBudget);
+        const req = createRequest({
+            method: 'POST',
+            url: '/api/budgets',
+            user: {
+                id: 1,
+            },
+            body: {
+                name: 'Presupuesto Prueba',
+                amount: 1000,
+            }
+
+        });
+        const res = createResponse();
+        await BudgetController.create(req, res);
+
+        const data = res._getJSONData();
+        expect(res.statusCode).toBe(201);
+        expect(data).toEqual('Presupuesto creado correctamente.');
+        expect(mockBudget.save).toHaveBeenCalled();
+        expect(mockBudget.save).toHaveBeenCalledTimes(1);
+        expect(Budget.create).toHaveBeenCalledWith(req.body);
+    })
+
+    it('Should handle budget creation error', async () => {
+        const mockBudget = {
+            save: jest.fn(),
+        };
+
+        (Budget.create as jest.Mock).mockRejectedValue(new Error);
+        const req = createRequest({
+            method: 'POST',
+            url: '/api/budgets',
+            user: {
+                id: 1,
+            },
+            body: {
+                name: 'Presupuesto Prueba',
+                amount: 1000,
+            }
+
+        });
+        const res = createResponse();
+        await BudgetController.create(req, res);
+
+        const data = res._getJSONData();
+        expect(res.statusCode).toBe(500);
+        expect(data).toEqual({ error: 'No se pudo crear el presupuesto.' });
+        expect(mockBudget.save).not.toHaveBeenCalled();
+        expect(Budget.create).toHaveBeenCalledWith(req.body);
+    })
+
 })
