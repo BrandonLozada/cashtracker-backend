@@ -149,7 +149,7 @@ describe('BudgetController.create', () => {
 
 })
 
-describe('BudgetController.finById', () => {
+describe('BudgetController.getById', () => {
 
     beforeEach(() => {
         (Budget.findByPk as jest.Mock).mockImplementation(id => {
