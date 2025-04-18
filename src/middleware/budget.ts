@@ -41,7 +41,7 @@ export const validateBudgetExists = async (
         const budget = await Budget.findByPk(budgetId)
         if (!budget) {
             const error = new Error('Presupuesto no encontrado.')
-            res.status(404).send({ error: error.message })
+            res.status(404).json({ error: error.message })
             return
         }
         req.budget = budget
@@ -50,7 +50,7 @@ export const validateBudgetExists = async (
     } catch (error) {
         res
             .status(500)
-            .send({ error: 'No se puedo completar la operación del presupuesto.' })
+            .json({ error: 'No se puedo completar la operación del presupuesto.' })
     }
 }
 
