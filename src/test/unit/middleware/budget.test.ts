@@ -1,5 +1,6 @@
 import { createRequest, createResponse } from 'node-mocks-http'
-import { validateBudgetExists } from '../../../middleware/budget'
+import { budgets } from '../../mocks/budgets'
+import { hasAccess, validateBudgetExists } from '../../../middleware/budget'
 import Budget from '../../../models/Budget'
 
 jest.mock('../../../models/Budget', () => ({
@@ -23,5 +24,73 @@ describe('budget - validateBudgetExists', () => {
         expect(res.statusCode).toBe(404)
         expect(data).toEqual({ error: 'Presupuesto no encontrado.' })
         expect(next).not.toHaveBeenCalled()
+    })
+
+    it('should handle catching error', async () => {
+        (Budget.findByPk as jest.Mock).mockRejectedValue(new Error)
+
+        const req = createRequest({
+            params: {
+                budgetId: 1,
+            }
+        })
+        const res = createResponse()
+        const next = jest.fn()
+
+        await validateBudgetExists(req, res, next)
+        const data = res._getJSONData()
+        expect(res.statusCode).toBe(500)
+        expect(data).toEqual({ error: 'No se puedo completar la operación del presupuesto.' })
+        expect(next).not.toHaveBeenCalled()
+    })
+
+    it('should proceed to next middleware if budget exists', async () => {
+        (Budget.findByPk as jest.Mock).mockResolvedValue(budgets[0])
+
+        const req = createRequest({
+            params: {
+                budgetId: 1,
+            }
+        })
+        const res = createResponse()
+        const next = jest.fn()
+
+        await validateBudgetExists(req, res, next)
+        expect(res.statusCode).not.toBe(404)
+        expect(next).toHaveBeenCalled()
+    })
+})
+
+describe('budget - hasAccess', () => {
+    it('Should call next() if user has access to budget', async () => {
+        const req = createRequest({
+            budget: budgets[0],
+            user: {
+                id: 1,
+            },
+        })
+        const res = createResponse()
+        const next = jest.fn()
+
+        hasAccess(req, res, next)
+        expect(next).toHaveBeenCalled()
+        expect(next).toHaveBeenCalledTimes(1)
+    })
+
+    it('Should return 401 error if userUd does not have access to budget', async () => {
+        const req = createRequest({
+            budget: budgets[0],
+            user: {
+                id: 2,
+            },
+        })
+        const res = createResponse()
+        const next = jest.fn()
+
+        hasAccess(req, res, next)
+        const data = res._getJSONData()
+        expect(next).not.toHaveBeenCalled()
+        expect(res.statusCode).toBe(401)
+        expect(data).toEqual({ error: 'Acción no válida.' })
     })
 })
