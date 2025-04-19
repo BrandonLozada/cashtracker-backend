@@ -13,11 +13,11 @@ export class AuthController {
             const error = new Error(
                 'Ya existe una cuenta con ese correo electrónico.'
             )
-            res.status(409).send({ error: error.message })
+            res.status(409).json({ error: error.message })
             return
         }
         try {
-            const user = new User(req.body)
+            const user = await User.create(req.body)
             user.password = await hashPassword(password)
             user.token = generateToken()
             await user.save()
@@ -26,9 +26,9 @@ export class AuthController {
                 email: user.email,
                 token: user.token,
             })
-            res.json('Cuenta creada correctamente.')
+            res.status(201).json('Cuenta creada correctamente.')
         } catch (error) {
-            res.status(500).send({ error: 'No se pudo crear la cuenta.' })
+            res.status(500).json({ error: 'No se pudo crear la cuenta.' })
         }
     }
 
@@ -37,7 +37,7 @@ export class AuthController {
         const user = await User.findOne({ where: { token } })
         if (!user) {
             const error = new Error('Token no válido.')
-            res.status(401).send({ error: error.message })
+            res.status(401).json({ error: error.message })
             return
         }
         user.confirmed = true
@@ -52,20 +52,20 @@ export class AuthController {
         const user = await User.findOne({ where: { email } })
         if (!user) {
             const error = new Error('Usuario no encontrado.')
-            res.status(404).send({ error: error.message })
+            res.status(404).json({ error: error.message })
             return
         }
 
         if (!user.confirmed) {
             const error = new Error('Cuenta no confirmada.')
-            res.status(403).send({ error: error.message })
+            res.status(403).json({ error: error.message })
             return
         }
 
         const isPasswordMatched = await checkPassword(password, user.password)
         if (!isPasswordMatched) {
             const error = new Error('Contraseña incorrecta.')
-            res.status(401).send({ error: error.message })
+            res.status(401).json({ error: error.message })
             return
         }
 
@@ -78,7 +78,7 @@ export class AuthController {
         const user = await User.findOne({ where: { email } })
         if (!user) {
             const error = new Error('Usuario no encontrado.')
-            res.status(404).send({ error: error.message })
+            res.status(404).json({ error: error.message })
             return
         }
         user.token = generateToken()
@@ -99,7 +99,7 @@ export class AuthController {
         const tokenExists = await User.findOne({ where: { token } })
         if (!tokenExists) {
             const error = new Error('Token no válido.')
-            res.status(404).send({ error: error.message })
+            res.status(404).json({ error: error.message })
             return
         }
 
@@ -113,7 +113,7 @@ export class AuthController {
         const user = await User.findOne({ where: { token } })
         if (!user) {
             const error = new Error('Token no válido.')
-            res.status(404).send({ error: error.message })
+            res.status(404).json({ error: error.message })
             return
         }
 
@@ -140,7 +140,7 @@ export class AuthController {
         )
         if (!isPasswordMatched) {
             const error = new Error('La contraseña actual es incorrecta.')
-            res.status(401).send({ error: error.message })
+            res.status(401).json({ error: error.message })
             return
         }
 
@@ -158,7 +158,7 @@ export class AuthController {
         const isPasswordMatched = await checkPassword(password, user.password)
         if (!isPasswordMatched) {
             const error = new Error('Contraseña incorrecta.')
-            res.status(401).send({ error: error.message })
+            res.status(401).json({ error: error.message })
             return
         }
 
