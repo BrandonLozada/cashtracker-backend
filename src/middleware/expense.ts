@@ -63,7 +63,7 @@ export const validateExpenseExists = async (
         const expense = await Expense.findByPk(expenseId)
         if (!expense) {
             const error = new Error('Gasto no encontrado.')
-            res.status(404).send({ error: error.message })
+            res.status(404).json({ error: error.message })
             return
         }
         req.expense = expense
@@ -72,6 +72,6 @@ export const validateExpenseExists = async (
     } catch (error) {
         res
             .status(500)
-            .send({ error: 'No se puedo completar la operación del gasto.' })
+            .json({ error: 'No se puedo completar la operación del gasto.' })
     }
 }
